@@ -1,5 +1,5 @@
 import UIKit
-
+import SnapKit
 
 public protocol SegmentedSwitchControlDelegate {
   func switchDidMoved(atIndex index: Int)
@@ -309,4 +309,42 @@ extension SegmentedSwitchControl: UIGestureRecognizerDelegate {
     return super.gestureRecognizerShouldBegin(gestureRecognizer)
   }
   
+}
+
+extension SegmentedSwitchControl {
+
+  func addShadow(shadowOpacity: Float = 0.0, shadowOffset: CGSize = CGSize(width: 0.0, height: 2.0), shadowRadius: CGFloat = 3.0, shadowColor: UIColor = UIColor.black) -> UIView? {
+    let cornerRadius = layer.cornerRadius
+    if cornerRadius > 0.0 && layer.masksToBounds == true && superview != nil {
+      let shadowView = UIView(frame: frame)
+      shadowView.tag = layer.hash
+      shadowView.backgroundColor = UIColor.clear
+      let _ = shadowView.addShadow(shadowOpacity: shadowOpacity, shadowOffset: shadowOffset, shadowRadius: shadowRadius, shadowColor: shadowColor)
+      shadowView.layer.shadowPath = UIBezierPath(roundedRect: bounds,
+                                                 cornerRadius: cornerRadius).cgPath
+      shadowView.layer.masksToBounds = true
+      shadowView.clipsToBounds = false
+      
+      if let oldView = superview!.viewWithTag(layer.hash) {
+        oldView.removeFromSuperview()
+      }
+      
+      superview!.insertSubview(shadowView, belowSubview: self)
+      
+      shadowView.snp.makeConstraints {
+        (make) -> Void in
+        make.left.right.top.bottom.equalTo(self)
+      }
+      
+      return shadowView
+    } else {
+      layer.shadowOpacity = shadowOpacity
+      layer.shadowOffset = shadowOffset
+      layer.shadowRadius = shadowRadius
+      layer.shadowColor = shadowColor.cgColor
+      layer.shadowPath = UIBezierPath(roundedRect: frame, cornerRadius: shadowRadius).cgPath
+    }
+    return nil
+  }
+
 }
